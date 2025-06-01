@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}My Enrollments{% endblock %}
+
+{% block content %}
+<h2 class="text-3xl font-bold text-blue-800 mb-8 text-center">My Enrolled Courses</h2>
+
+{% if courses|length == 0 %}
+    <p class="text-center text-gray-600">You are not enrolled in any courses yet.</p>
+    <div class="mt-8 text-center">
+        {% if session.get('role') == 'instructor' %}
+            <a href="{{ url_for('add_course') }}" class="btn btn-primary">Add New Course</a>
+        {% endif %}
+    </div>
+{% else %}
+    <div class="grid gap-8 md:grid-cols-2">
+    {% for course in courses %}
+    <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col">
+        <h3 class="text-2xl font-bold text-blue-700 mb-2">{{ course.course_name }}</h3>
+        <div class="flex flex-wrap items-center text-sm text-gray-500 mb-4">
+            <span class="mr-4"><span class="font-semibold text-blue-600">Credits:</span> {{ course.credits }}</span>
+            <span><span class="font-semibold text-blue-600">Instructor:</span> {{ course.teacher_name }}</span>
+        </div>
+        {% if course.assignments|length == 0 %}
+            <p class="text-gray-500 italic">No assignments posted for this course yet.</p>
+        {% else %}
+            <div class="overflow-x-auto rounded-lg">
+                <table class="min-w-full divide-y divide-blue-100 rounded-lg shadow-sm">
+                    <thead class="bg-blue-100 text-blue-800">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Assignment</th>
+                            <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Due</th>
+                            <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider">Grade</th>
+                            <th class="px-4 py-2 text-center text-xs font-semibold uppercase tracking-wider">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-blue-50">
+                        {% for assignment in course.assignments %}
+                        <tr class="hover:bg-blue-50 transition duration-150">
+                            <td class="px-4 py-2 font-medium text-gray-900">{{ assignment.title }}</td>
+                            <td class="px-4 py-2 text-gray-500">{{ assignment.due_date.strftime('%Y-%m-%d %H:%M') if assignment.due_date else 'N/A' }}</td>
+                            <td class="px-4 py-2 text-center">
+                                {% if assignment.submitted_file_path %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Submitted</span>
+                                {% else %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">Not Submitted</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                                {% if assignment.grade %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">{{ assignment.grade }}</span>
+                                {% else %}
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                                {% if assignment.submitted_file_path %}
+                                    <a href="{{ url_for('submit_assignment', assignment_id=assignment.assignment_id) }}" class="text-orange-600 hover:text-orange-900 font-semibold">Resubmit</a>
+                                    <span class="text-gray-400 mx-1">|</span>
+                                    <a href="{{ url_for('uploaded_file', filename=assignment.submitted_file_path.split('/')[-1]) }}" target="_blank" class="text-blue-600 hover:text-blue-900 font-semibold">View</a>
+                                {% else %}
+                                    <a href="{{ url_for('submit_assignment', assignment_id=assignment.assignment_id) }}" class="text-blue-600 hover:text-blue-900 font-semibold">Submit</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+    </div>
+    <div class="mt-8 text-center">
+        {% if session.get('role') == 'instructor' %}
+            <a href="{{ url_for('add_course') }}" class="btn btn-primary">Add New Course</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Home - COURSE MANAGEMENT WEB{% endblock %}
+
+{% block content %}
+<section class="text-center py-16 bg-white rounded-lg shadow-md" data-aos="fade-up">
+    <h2 class="text-4xl font-bold text-gray-800 mb-4">Welcome to CourseMAGE!</h2>
+    <p class="text-lg text-gray-600 mb-6">Your comprehensive platform for managing and engaging with courses.</p>
+</section>
+
+{# Feature Cards Section - Always visible after the main welcome #}
+<section class="grid md:grid-cols-3 gap-6 mt-10">
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition duration-300" data-aos="fade-up" data-aos-delay="100">
+        <h3 class="text-xl font-bold mb-2 text-blue-700">Track Assignments</h3>
+        <p class="text-gray-600">As a student, you can easily submit assignments and track your submission status and grades. Never miss a deadline with real-time updates on your tasks.</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition duration-300" data-aos="fade-up" data-aos-delay="200">
+        <h3 class="text-xl font-bold mb-2 text-blue-700">Manage Courses & Enrollments</h3>
+        <p class="text-gray-600">Students can browse and enroll in various courses. Instructors can create, manage, and edit their courses effortlessly.</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition duration-300" data-aos="fade-up" data-aos-delay="300">
+        <h3 class="text-xl font-bold mb-2 text-blue-700">Grade Submissions</h3>
+        <p class="text-gray-600">For instructors, easily view student submissions and conveniently grade them. Provide timely feedback to your students with our intuitive grading system.</p>
+    </div>
+</section>
+
+{# Dynamic Buttons for Logged-In Users OR Login/Register for Logged-Out Users #}
+{% if session.get('user_id') %}
+<section class="action-buttons-section text-center py-8 bg-white rounded-lg shadow-md mt-10" data-aos="fade-up" data-aos-delay="400">
+    <h3 class="text-2xl font-bold text-gray-800 mb-4">Quick Actions:</h3>
+    <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+        <a href="{{ url_for('courses') }}" class="inline-block px-8 py-4 bg-blue-400 text-white text-lg font-bold rounded-xl shadow-md hover:bg-blue-500 focus:bg-blue-500 transition duration-200 ease-in-out mr-2">View All Courses</a>
+        {% if session.get('role') == 'student' %}
+            <a href="{{ url_for('my_enrollments') }}" class="inline-block px-8 py-4 bg-blue-500 text-white text-lg font-bold rounded-xl shadow-md hover:bg-blue-600 focus:bg-blue-600 transition duration-200 ease-in-out mr-2">My Enrollments</a>
+            <a href="{{ url_for('my_grades') }}" class="inline-block px-8 py-4 bg-purple-500 text-white text-lg font-bold rounded-xl shadow-md hover:bg-purple-600 focus:bg-purple-600 transition duration-200 ease-in-out">My Grades</a>
+        {% elif session.get('role') == 'instructor' %}
+            <a href="{{ url_for('instructor_courses') }}" class="inline-block px-8 py-4 bg-blue-500 text-white text-lg font-bold rounded-xl shadow-md hover:bg-blue-600 focus:bg-blue-600 transition duration-200 ease-in-out mr-2">Manage My Courses</a>
+            <a href="{{ url_for('track_students') }}" class="inline-block px-8 py-4 bg-purple-500 text-white text-lg font-bold rounded-xl shadow-md hover:bg-purple-600 focus:bg-purple-600 transition duration-200 ease-in-out">Track Students</a>
+        {% endif %}
+    </div>
+</section>
+{% else %}
+<section class="auth-options-section text-center py-8 bg-white rounded-lg shadow-md mt-10" data-aos="fade-up" data-aos-delay="400">
+    <h3 class="text-2xl font-bold text-gray-800 mb-4">Get Started Today!</h3>
+    <p class="text-md text-gray-600 mb-6">Access your personalized dashboard or create a new account to begin your journey.</p>
+    <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+        <a href="{{ url_for('login') }}" class="inline-block px-5 py-2 bg-blue-500 text-white text-base font-bold rounded-xl shadow-md hover:bg-blue-600 focus:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg mr-2">Login</a>
+        <a href="{{ url_for('register') }}" class="inline-block px-5 py-2 bg-blue-500 text-white text-base font-bold rounded-xl shadow-md hover:bg-blue-600 focus:bg-blue-600 transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg">Register</a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

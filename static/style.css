@@ -1,0 +1,299 @@
+/* Base styles */
+body {
+    font-family: 'Inter', sans-serif; /* Using Inter font */
+    background: #EDE9FE; /* Very light purple background */
+    margin: 0;
+    padding: 0 1.5rem;
+    color: #333; /* Dark text for readability */
+    line-height: 1.6;
+    animation: fadeIn 0.8s ease-in; /* Global fade-in animation */
+}
+
+h1, h2, h3 {
+    color: #5B21B6; /* Deep violet for headings */
+    margin-bottom: 1rem;
+    transition: color 0.3s ease-in-out; /* Smooth color transition for headings */
+}
+
+a {
+    color: #7C3AED; /* Medium violet for links */
+    text-decoration: none;
+    transition: color 0.3s ease, transform 0.2s ease; /* Smooth transitions for links */
+}
+
+a:hover {
+    color: #6D28D9; /* Darker violet on link hover */
+    text-decoration: underline;
+    transform: translateY(-1px); /* Slight lift on hover */
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background: #D8B4FE; /* Light purple line */
+    margin: 2rem 0;
+}
+
+/* Navbar / Header links */
+header nav a {
+    margin-right: 15px;
+    font-weight: 600;
+    padding: 0.5rem 0.75rem; /* Add some padding */
+    border-radius: 0.5rem; /* Rounded corners */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Smooth transition for nav links */
+    color: white; /* Ensure text is white by default in the header */
+}
+
+header nav a:hover {
+    background-color: #8B5CF6; /* Lighter purple background on hover for better contrast */
+    color: white; /* Explicitly ensure text remains white on hover */
+    transform: translateY(-2px); /* Lift effect on hover */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+/* Specific styling for CourseMAGE link in header */
+header h1 a {
+    background: linear-gradient(45deg, #E0F2FE, #BFDBFE, #93C5FD); /* Light blue gradient */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent; /* Fallback for non-webkit browsers */
+    text-decoration: none; /* Remove default underline from the link */
+    transition: all 0.3s ease-in-out; /* Smooth transition for hover effects */
+}
+
+header h1 a:hover {
+    background: linear-gradient(45deg, #DBEAFE, #93C5FD, #60A5FA); /* Slightly darker gradient on hover */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    transform: scale(1.05); /* Slight zoom effect on hover */
+}
+
+
+/* Page title */
+.page-title {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Subtle text shadow */
+}
+
+/* Table styling */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* Enhanced shadow */
+    border-radius: 12px; /* More rounded corners for tables */
+    overflow: hidden; /* Ensures rounded corners apply to content */
+}
+
+thead {
+    background-color: #5B21B6; /* Deep violet header */
+    color: white;
+}
+
+thead th {
+    padding: 14px 15px; /* Slightly more padding */
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase; /* Uppercase for table headers */
+    letter-spacing: 0.05em; /* Spacing for readability */
+}
+
+tbody tr:nth-child(even) {
+    background-color: #F5F3FF; /* Very light purple for even rows */
+}
+
+tbody td {
+    padding: 10px 15px; /* Reduced padding for table cells */
+    border-bottom: 1px solid #E5D5FF; /* Lighter border color */
+}
+
+/* Hover effect on table rows */
+tbody tr {
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Smooth transitions */
+}
+
+tbody tr:hover {
+    background-color: #D8B4FE; /* Lighter purple on hover */
+    transform: translateY(-3px); /* Noticeable lift effect */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+    cursor: pointer;
+}
+
+/* Form styling */
+form {
+    max-width: 600px;
+    background-color: #FFFFFF; /* White background for forms */
+    padding: 30px; /* More padding */
+    border-radius: 12px; /* More rounded corners */
+    box-shadow: 0 5px 20px rgba(91, 33, 182, 0.15); /* Violet-tinted shadow */
+    margin-bottom: 2rem;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px; /* More space below labels */
+    font-weight: 600;
+    color: #4A0E80; /* Darker violet for labels */
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="datetime-local"],
+select,
+textarea {
+    width: 100%;
+    padding: 12px 15px; /* More padding for inputs */
+    margin-bottom: 20px; /* More space below inputs */
+    border: 1.5px solid #C4B5FD; /* Light purple border */
+    border-radius: 8px; /* Rounded input fields */
+    font-size: 1.05rem; /* Slightly larger font */
+    font-family: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transitions */
+    resize: vertical;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="datetime-local"]:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #7C3AED; /* Medium violet on focus */
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.3); /* Ring effect on focus */
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 10px 22px; /* More padding for buttons */
+    font-size: 1.05rem;
+    border-radius: 8px; /* Rounded buttons */
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    text-align: center;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* All-encompassing transition */
+    user-select: none;
+    background-color: #A78BFA; /* Default medium purple */
+    color: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+}
+
+.btn:hover {
+    transform: translateY(-2px); /* Lift effect on hover */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* Stronger shadow on hover */
+}
+
+.btn-primary {
+    background-color: #2563EB; /* Tailwind blue-600 for primary buttons */
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #1D4ED8; /* Tailwind blue-700 on primary hover */
+    transform: translateY(-3px); /* More pronounced lift */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25); /* Even stronger shadow */
+}
+
+.btn-sm {
+    padding: 7px 14px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+}
+
+/* Custom gradient button style */
+.btn-custom-gradient {
+    background-color: #60A5FA; /* Light blue background (Tailwind blue-400) */
+    color: white; /* White text */
+    transition: background 0.5s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Smooth transition for gradient */
+    background-size: 200% auto; /* For animating the gradient */
+}
+
+.btn-custom-gradient:hover {
+    background-image: linear-gradient(90deg, #1E3A8A, #5B21B6); /* Dark blue to purple gradient */
+    background-position: right center; /* Animate the gradient on hover */
+    color: white; /* Ensure text remains white */
+    transform: translateY(-2px); /* Keep existing hover effect */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* Keep existing hover effect */
+}
+
+
+/* Flash messages */
+.flash-message {
+    padding: 1.2rem; /* More padding */
+    margin-bottom: 1.5rem; /* More margin */
+    border-radius: 0.75rem; /* More rounded */
+    font-weight: 500;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Add shadow to flash messages */
+}
+
+.flash-message.success {
+    background-color: #D1FAE5; /* Light green */
+    color: #065F46; /* Dark green */
+    border: 1px solid #6EE7B7;
+}
+
+.flash-message.warning {
+    background-color: #FEF3C7; /* Light yellow */
+    color: #92400E; /* Dark orange */
+    border: 1px solid #FCD34D;
+}
+
+.flash-message.danger {
+    background-color: #FEE2E2; /* Light red */
+    color: #991B1B; /* Dark red */
+    border: 1px solid #FCA5A5;
+}
+
+.flash-message.info {
+    background-color: #DBEAFE; /* Light blue */
+    color: #1E40AF; /* Dark blue */
+    border: 1px solid #93C5FD;
+}
+
+
+/* Utility classes */
+.no-courses-msg {
+    font-style: italic;
+    color: #8B5CF6; /* Medium purple for info messages */
+    text-align: center;
+    padding: 1rem;
+    background-color: #F5F3FF;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    body {
+        padding: 0 0.75rem; /* Less padding on small screens */
+    }
+    form {
+        padding: 20px;
+    }
+
+    thead th, tbody td {
+        padding: 10px 8px;
+        font-size: 0.85rem; /* Smaller font for tables on mobile */
+    }
+    header nav a {
+        margin: 0.25rem 0.5rem; /* Adjust nav spacing */
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}

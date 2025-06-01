@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}My Grades{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-8 text-center" data-aos="fade-up">My Grades</h1>
+
+    {% if all_student_grades %}
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8" data-aos="fade-up" data-aos-delay="100">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Course
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Submitted Date
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Due Date
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Grade
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for course in all_student_grades %}
+                            {% for assignment in course.assignments %} {# Iterate directly over assignments if they exist #}
+                                <tr class="hover:bg-gray-50" data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        {{ course.course_name }} <span class="text-xs text-gray-500">({{ course.teacher_name }})</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                        {% if assignment.submitted_file_path or assignment.grade is not none %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                                Submitted
+                                            </span>
+                                        {% else %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                Not Submitted
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        {% if assignment.submission_date %}
+                                            {{ assignment.submission_date.strftime('%Y-%m-%d %H:%M') }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">
+                                        {{ assignment.due_date.strftime('%Y-%m-%d %H:%M') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                        {% if assignment.grade is not none %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                {{ assignment.grade }}
+                                            </span>
+                                        {% else %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                Pending
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {# Removed the 'else' block for course.assignments #}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600 text-lg bg-blue-100 text-blue-800 p-4 rounded-lg shadow-sm" data-aos="fade-up" data-aos-delay="200">
+            You are not enrolled in any courses yet.
+        </p>
+    {% endif %}
+
+    <div class="text-center mt-8" data-aos="fade-up" data-aos-delay="500">
+        <a href="{{ url_for('home') }}" class="inline-flex items-center px-6 py-3 bg-gray-600 text-white font-semibold rounded-md shadow-md 
+                  hover:bg-gray-700 transform hover:scale-105 transition duration-300 ease-in-out">
+            Back to Home
+        </a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Course Management System{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        /* Optional: Custom styles if needed */
+        body {
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        /* Sticky header for table in view_students */
+        .sticky-header th {
+            position: sticky;
+            top: 0;
+            z-index: 20; /* Ensure it's above other content */
+        }
+        .sticky.left-0 {
+            position: sticky;
+            left: 0;
+            z-index: 20; /* Ensure it's above scrolling content */
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-gray-900">
+
+    <header class="bg-blue-700 text-white shadow-md py-4 px-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('home') }}" class="text-2xl font-bold tracking-tight bg-gradient-to-r from-white to-blue-400 bg-clip-text text-transparent hover:from-white hover:to-blue-600 transition duration-300">
+                CourseMAGE
+            </a>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li class="nav-item">
+                        <a class="nav-link hover:text-blue-200 transition duration-300" href="{{ url_for('home') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link hover:text-blue-200 transition duration-300" href="{{ url_for('about') }}">About</a>
+                    </li>
+                    {% if session.get('user_id') %}
+                        {# Links for logged-in users #}
+                        <li class="nav-item">
+                            <a class="nav-link hover:text-blue-200 transition duration-300" href="{{ url_for('courses') }}">Courses</a>
+                        </li>
+                        {% if session.get('role') == 'instructor' %}
+                        <li class="nav-item">
+                            <a class="nav-link hover:text-blue-200 transition duration-300" href="{{ url_for('instructor_courses') }}">My Courses</a>
+                        </li>
+                        {% endif %}
+                        {% if session.get('role') == 'student' %}
+                            <li class="nav-item">
+                                <a class="nav-link hover:text-blue-200 transition duration-300" href="{{ url_for('my_enrollments') }}">My Enrollments</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link hover:text-blue-200 transition duration-300" href="{{ url_for('my_grades') }}">My Grades</a> {# NEW LINK FOR STUDENT GRADEBOOK #}
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link hover:text-blue-200 transition duration-300" href="{{ url_for('logout') }}">Logout ({{ session.get('full_name', session.get('login_id', 'Guest')) }})</a>
+                        </li>
+                    {% else %}
+                        {# Links for guests #}
+                        <li class="nav-item">
+                            <a class="nav-link hover:text-blue-200 transition duration-300" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link hover:text-blue-200 transition duration-300" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto py-8 px-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="my-4">
+                    {% for category, message in messages %}
+                        <div class="p-3 mb-3 rounded-md text-white
+                            {% if category == 'success' %} bg-green-500
+                            {% elif category == 'danger' %} bg-red-500
+                            {% elif category == 'warning' %} bg-yellow-500
+                            {% else %} bg-blue-500 {% endif %}"
+                            data-aos="fade-down">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}
+            {# Content from child templates will be inserted here #}
+        {% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 mt-10 shadow-inner">
+        <div class="container mx-auto text-center">
+            <p>@CourseMAGE, Najma Lanka. All rights reserved.</p>
+            <p class="text-sm text-gray-400">Built with Flask & Tailwind CSS</p>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800, // values from 0 to 3000, with step 50ms
+            once: true,    // whether animation should happen only once - while scrolling down
+        });
+        
+        // Optional: Close flash messages after a few seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.my-4 > div');
+            flashMessages.forEach(msg => {
+                setTimeout(() => {
+                    msg.classList.add('hidden'); // Or removeChild(msg)
+                }, 5000); // Hide after 5 seconds
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Assignments for {{ course.name }}{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8" data-aos="fade-up">
+        <h1 class="text-3xl font-bold text-blue-800 mb-6 text-center">Assignments for "{{ course.name }}"</h1>
+        <div class="flex justify-end mb-4">
+            <a href="{{ url_for('add_assignment', course_id=course.id) }}"
+               class="btn btn-custom-gradient font-semibold shadow-md transition-transform duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                + Add Assignment
+            </a>
+        </div>
+        {% if assignments %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 rounded-lg shadow-sm animate-fadeIn" data-aos="fade-up" data-aos-delay="100">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Title</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Due Date</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for assignment in assignments %}
+                        <tr class="hover:bg-purple-50 transition duration-200 ease-in-out" data-aos="fade-up" data-aos-delay="{{ loop.index * 50 }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ assignment.title }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ assignment.due_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <a href="{{ url_for('edit_assignment', assignment_id=assignment.id) }}"
+                                   class="btn btn-primary btn-sm transition-transform duration-300 ease-in-out transform hover:scale-110 hover:bg-blue-700 shadow-md">
+                                    Edit
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-center text-gray-600 text-lg bg-blue-100 text-blue-800 p-4 rounded-lg shadow-sm animate-fadeIn" data-aos="fade-up" data-aos-delay="200">
+                No assignments found for this course.
+            </p>
+        {% endif %}
+        <div class="text-center mt-8" data-aos="fade-up" data-aos-delay="300">
+            <a href="{{ url_for('courses') }}"
+               class="inline-flex items-center px-6 py-3 bg-gray-600 text-white font-semibold rounded-md shadow-md hover:bg-gray-700 transform hover:scale-105 transition duration-300 ease-in-out">
+                Back to Courses
+            </a>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+    animation: fadeIn 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Add Assignment{% endblock %}
+
+{% block content %}
+<section class="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow-md" data-aos="fade-up">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Add Assignment for "{{ course.name }}"</h2>
+
+    {# Corrected: The action URL for the form should point to 'add_assignment' endpoint #}
+    <form method="POST" action="{{ url_for('add_assignment', course_id=course.id) }}" class="space-y-6">
+        <div>
+            <label for="title" class="block text-gray-700 text-sm font-semibold mb-2">Assignment Title:</label>
+            <input type="text" id="title" name="title" required
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <div>
+            <label for="description" class="block text-gray-700 text-sm font-semibold mb-2">Description (Optional):</label>
+            <textarea id="description" name="description" rows="4"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+
+        <div>
+            <label for="due_date" class="block text-gray-700 text-sm font-semibold mb-2">Due Date:</label>
+            <input type="datetime-local" id="due_date" name="due_date" required
+                   min="{{ now().strftime('%Y-%m-%dT%H:%M') }}"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+
+        <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            Add Assignment
+        </button>
+    </form>
+
+    <div class="mt-8 text-center">
+        <a href="{{ url_for('courses') }}" class="text-blue-600 hover:underline text-sm">Back to Courses</a>
+    </div>
+</section>
+{% endblock %}
