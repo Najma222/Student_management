@@ -3,27 +3,95 @@
 
 {% block content %}
 <section class="max-w-md mx-auto mt-10 bg-white p-8 rounded-lg shadow-md" data-aos="fade-up">
-    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Login</h2>
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Welcome Back</h2>
+    
     <form method="POST" action="{{ url_for('login') }}" class="space-y-6">
         <div>
-            <label for="login_id" class="block text-gray-700 text-sm font-semibold mb-2">ID:</label> {# Changed label #}
-            <input type="text" id="login_id" name="login_id" required {# IMPORTANT: Ensure name="login_id" #}
-                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                   placeholder="Your College ID or User ID" /> {# Changed placeholder #}
+            <label for="login_id" class="block text-gray-700 text-sm font-semibold mb-2">Login ID:</label>
+            <input type="text" id="login_id" name="login_id" required
+                   class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                   placeholder="Enter your college ID or username" />
         </div>
 
         <div>
             <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Password:</label>
             <input type="password" id="password" name="password" required
-                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                   placeholder="Your password" />
+                   class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                   placeholder="Enter your password" />
         </div>
 
         <button type="submit"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-            Login
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg">
+            Sign In
         </button>
     </form>
-    <p class="mt-6 text-center text-gray-600">Don't have an account? <a href="{{ url_for('register') }}" class="text-blue-600 hover:underline">Register here</a>.</p>
+    
+    <!-- Help Section -->
+    <div class="mt-8 border-t pt-6">
+        <button id="help-toggle" class="w-full text-center text-gray-600 hover:text-blue-600 transition duration-200 flex items-center justify-center space-x-2 py-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span class="font-medium">Need Help?</span>
+            <svg id="help-chevron" class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        
+        <div id="help-content" class="hidden mt-4 space-y-3">
+            <!-- Account Access -->
+            <div class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition duration-200">
+                <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+                    </svg>
+                    Account Access
+                </h4>
+                <div class="space-y-1 text-sm">
+                    <a href="{{ url_for('forgot_password') }}" class="text-blue-600 hover:text-blue-700 hover:underline block">Forgot your password?</a>
+                    <a href="{{ url_for('forgot_id') }}" class="text-blue-600 hover:text-blue-700 hover:underline block">Forgot your login ID?</a>
+                </div>
+            </div>
+            
+            <!-- Account Setup -->
+            <div class="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition duration-200">
+                <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Account Setup
+                </h4>
+                <div class="text-sm">
+                    <a href="{{ url_for('resend_verification') }}" class="text-blue-600 hover:text-blue-700 hover:underline block">Resend verification email?</a>
+                </div>
+            </div>
+            
+            <!-- New Users -->
+            <div class="bg-blue-50 rounded-lg p-4 hover:bg-blue-100 transition duration-200 border border-blue-200">
+                <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
+                    <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                    </svg>
+                    New User?
+                </h4>
+                <div class="text-sm">
+                    <a href="{{ url_for('register') }}" class="text-blue-600 hover:text-blue-700 hover:underline font-medium">Create your account</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const helpToggle = document.getElementById('help-toggle');
+    const helpContent = document.getElementById('help-content');
+    const helpChevron = document.getElementById('help-chevron');
+    
+    helpToggle.addEventListener('click', function() {
+        helpContent.classList.toggle('hidden');
+        helpChevron.classList.toggle('rotate-180');
+    });
+});
+</script>
 {% endblock %}

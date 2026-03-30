@@ -1,24 +1,149 @@
 # app.py
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, send_file
 from flask_bcrypt import Bcrypt
+from itsdangerous import URLSafeTimedSerializer
 from functools import wraps
-from datetime import datetime
+from datetime import datetime, timedelta
 import mysql.connector
 from mysql.connector import Error
 import os
 from werkzeug.utils import secure_filename
 import pandas as pd
 import io
+import resend
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Professional email template
+EMAIL_VERIFICATION_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Account</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f4; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;">
+    
+    <!-- Main Container -->
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f4f4f4; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table width="100%" max-width="600" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; margin: 0 auto;">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 40px 30px 20px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                            <div style="font-size: 32px; font-weight: bold; color: #1a73e8; margin-bottom: 10px;">
+                                📚 CourseMAGE
+                            </div>
+                            <div style="font-size: 14px; color: #5f6368; font-weight: 500;">
+                                Secure Student Portal
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Content -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 0 30px 30px 30px; border-radius: 0 0 8px 8px;">
+                            
+                            <!-- Welcome Message -->
+                            <div style="text-align: center; margin-bottom: 30px;">
+                                <h1 style="color: #202124; font-size: 24px; font-weight: 600; margin: 0 0 10px 0;">
+                                    Welcome, {name}!
+                                </h1>
+                                <p style="color: #5f6368; font-size: 16px; line-height: 1.5; margin: 0;">
+                                    Thank you for registering with CourseMAGE. Please verify your email address to activate your account.
+                                </p>
+                            </div>
+                            
+                            <!-- Verify Button -->
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{verify_url}" 
+                                           style="background-color: #1a73e8; color: #ffffff; font-size: 16px; font-weight: 600; text-decoration: none; padding: 15px 30px; border-radius: 6px; display: inline-block; -webkit-text-size-adjust: none;">
+                                            Verify Your Account
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Alternative Link -->
+                            <div style="text-align: center; margin: 20px 0;">
+                                <p style="color: #5f6368; font-size: 14px; line-height: 1.5; margin: 0;">
+                                    If the button above doesn't work, copy and paste this link into your browser:
+                                </p>
+                                <p style="color: #1a73e8; font-size: 12px; word-break: break-all; margin: 5px 0; font-family: 'Courier New', monospace;">
+                                    {verify_url}
+                                </p>
+                            </div>
+                            
+                            <!-- Security Info -->
+                            <div style="background-color: #f8f9fa; border-left: 4px solid #1a73e8; padding: 15px; margin: 20px 0;">
+                                <p style="color: #5f6368; font-size: 14px; line-height: 1.5; margin: 0;">
+                                    <strong>🔒 Security Notice:</strong> This link expires in 1 hour for your protection. If you didn't request this verification, you can safely ignore this email.
+                                </p>
+                            </div>
+                            
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 0; text-align: center;">
+                            <div style="color: #5f6368; font-size: 14px; line-height: 1.5;">
+                                <p style="margin: 0 0 10px 0;">
+                                    Thanks,<br>
+                                    <strong>CourseMAGE Team</strong>
+                                </p>
+                                <div style="border-top: 1px solid #e0e0e0; padding-top: 15px; margin-top: 15px;">
+                                    <p style="margin: 0; font-size: 12px; color: #9aa0a6;">
+                                        This is an automated message. Please do not reply to this email.
+                                    </p>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+    
+</body>
+</html>
+"""
 
 # Initialize Flask app
 app = Flask(__name__)
-# Set a strong secret key for session management. CHANGE THIS IN PRODUCTION!
-app.secret_key = 'key1234'
+# Set a strong secret key for session management from environment
+app.secret_key = os.getenv('SECRET_KEY', 'key1234')  # Fallback to existing key
 
 # Configuration for file uploads
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'docx', 'pptx', 'xlsx'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Email configuration for Resend
+app.config['RESEND_API_KEY'] = os.getenv('RESEND_API_KEY')
+app.config['RESEND_FROM_EMAIL'] = os.getenv('RESEND_FROM_EMAIL')
+
+# Initialize Resend
+resend.api_key = app.config['RESEND_API_KEY']
+s = URLSafeTimedSerializer(app.secret_key)
+
+# Check if Resend API key is configured
+print(f"[DEBUG] RESEND_API_KEY from env: {app.config['RESEND_API_KEY']}")
+print(f"[DEBUG] RESEND_FROM_EMAIL from env: {app.config['RESEND_FROM_EMAIL']}")
+if not app.config['RESEND_API_KEY'] or app.config['RESEND_API_KEY'] == 'your_resend_api_key_here':
+    print("[WARNING] Resend API key not configured. Email functionality will show links in console.")
+    REEND_CONFIGURED = False
+else:
+    print("[INFO] Resend API key configured. Email functionality enabled.")
+    REEND_CONFIGURED = True
 
 # Create the uploads folder if it doesn't exist
 if not os.path.exists(UPLOAD_FOLDER):
@@ -122,6 +247,10 @@ def about():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     """Handles user registration. Supports GET for displaying form and POST for submission."""
+    # Clear any existing flash messages on GET request
+    if request.method == 'GET':
+        session.pop('_flashes', None)
+        
     if request.method == 'POST':
         login_id = request.form['login_id'].strip()
         full_name = request.form['full_name'].strip()
@@ -147,12 +276,49 @@ def register():
                     flash("ID or email already taken.", "danger")
                     return render_template('register.html')
 
+                # Generate email verification token
+                token = s.dumps(email, salt='email-confirm')
+                verification_url = url_for('verify_email', token=token, _external=True)
+                expires_at = datetime.now() + timedelta(hours=1)
+
+                # Insert user with verification fields
                 cursor.execute(
-                    "INSERT INTO users (login_id, password, full_name, email, role) VALUES (%s, %s, %s, %s, %s)",
-                    (login_id, hashed_password, full_name, email, role)
+                    "INSERT INTO users (login_id, password, full_name, email, role, is_verified, email_verification_token, email_verification_expires) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                    (login_id, hashed_password, full_name, email, role, False, token, expires_at)
                 )
                 conn.commit()
-                flash("Registration successful! Please log in.", "success")
+
+                # Send verification email
+                if not REEND_CONFIGURED:
+                    # Development mode - show link in console and flash message
+                    print(f"[DEV MODE] Verification link: {verification_url}")
+                    flash("Email service not configured. Please check console for verification link.", "warning")
+                else:
+                    try:
+                        print(f"[DEBUG] Attempting to send email to: {email}")
+                        print(f"[DEBUG] From: {app.config['RESEND_FROM_EMAIL']}")
+
+                        # Use professional email template
+                        html_content = EMAIL_VERIFICATION_TEMPLATE.format(
+                            name=full_name,
+                            verify_url=verification_url
+                        )
+
+                        params = {
+                            "from": app.config['RESEND_FROM_EMAIL'],
+                            "to": [email],
+                            "subject": "Verify Your Student Account",
+                            "html": html_content
+                        }
+                        result = resend.Emails.send(params)
+                        print(f"[DEBUG] Resend API response: {result}")
+                        flash("Registration successful! Please check your email to verify your account.", "info")
+                    except Exception as e:
+                        print(f"[Email Error] {e}")
+                        print(f"[DEBUG] Error type: {type(e).__name__}")
+                        # Fallback to showing the link
+                        flash(f"Email service error. Please use this verification link: {verification_url}", "warning")
+
                 return redirect(url_for('login'))
             else:
                 flash("Database connection failed.", "danger")
@@ -167,9 +333,134 @@ def register():
 
     return render_template('register.html')
 
+@app.route('/verify_email/<token>')
+def verify_email(token):
+    """Handles email verification with token validation."""
+    try:
+        # Verify token and get email (expires in 1 hour)
+        email = s.loads(token, salt='email-confirm', max_age=3600)
+    except:
+        flash("The verification link is invalid or expired. Please request a new one.", "danger")
+        return redirect(url_for('register'))
+    
+    conn = None
+    cursor = None
+    try:
+        conn = get_connection()
+        if conn:
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT id, full_name, is_verified FROM users WHERE email=%s", (email,))
+            user = cursor.fetchone()
+            
+            if not user:
+                flash("Invalid verification link.", "danger")
+                return redirect(url_for('register'))
+            
+            if user['is_verified']:
+                flash("Your account is already verified. You can log in.", "info")
+                return redirect(url_for('login'))
+            
+            # Mark user as verified
+            cursor.execute("UPDATE users SET is_verified=TRUE, email_verification_token=NULL, email_verification_expires=NULL WHERE email=%s", (email,))
+            conn.commit()
+            
+            flash(f"Success! Your account has been verified. You can now log in, {user['full_name']}!", "success")
+            return redirect(url_for('login'))
+        else:
+            flash("Database connection failed.", "danger")
+    except Exception as e:
+        print(f"[DB Error] {e}")
+        flash("An error occurred during verification. Please try again.", "danger")
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+    
+    return redirect(url_for('register'))
+
+@app.route('/resend_verification', methods=['GET', 'POST'])
+def resend_verification():
+    """Resend verification email to users."""
+    # Clear any existing flash messages on GET request
+    if request.method == 'GET':
+        session.pop('_flashes', None)
+        
+    if request.method == 'POST':
+        email = request.form['email'].strip()
+        
+        if not email:
+            flash("Please enter your email address.", "warning")
+            return render_template('resend_verification.html')
+        
+        conn = None
+        cursor = None
+        try:
+            conn = get_connection()
+            if conn:
+                cursor = conn.cursor(dictionary=True)
+                cursor.execute("SELECT id, full_name, is_verified FROM users WHERE email=%s", (email,))
+                user = cursor.fetchone()
+                
+                if user and not user['is_verified']:
+                    # Generate new verification token
+                    token = s.dumps(email, salt='email-confirm')
+                    verification_url = url_for('verify_email', token=token, _external=True)
+                    expires_at = datetime.now() + timedelta(hours=1)
+                    
+                    # Update user with new token
+                    cursor.execute("UPDATE users SET email_verification_token=%s, email_verification_expires=%s WHERE email=%s", 
+                                 (token, expires_at, email))
+                    conn.commit()
+                    
+                    # Send verification email
+                    if not REEND_CONFIGURED:
+                        # Development mode - show link in console
+                        print(f"[DEV MODE] Verification link: {verification_url}")
+                        flash("Email service not configured. Please check console for verification link.", "warning")
+                    else:
+                        try:
+                            # Use professional email template
+                            html_content = EMAIL_VERIFICATION_TEMPLATE.format(
+                                name=user['full_name'],
+                                verify_url=verification_url
+                            )
+                            
+                            params = {
+                                "from": app.config['RESEND_FROM_EMAIL'],
+                                "to": [email],
+                                "subject": "Verify Your Student Account",
+                                "html": html_content
+                            }
+                            resend.Emails.send(params)
+                            flash("Verification email sent! Please check your inbox.", "success")
+                        except Exception as e:
+                            print(f"[Email Error] {e}")
+                            flash(f"Email service error. Please use this verification link: {verification_url}", "warning")
+                elif user and user['is_verified']:
+                    flash("Your account is already verified. You can log in.", "info")
+                else:
+                    # Don't reveal if email exists or not
+                    flash("If an account with that email exists and is not verified, a verification link has been sent.", "info")
+                    
+        except Exception as e:
+            print(f"[DB Error] {e}")
+            flash("An error occurred. Please try again.", "danger")
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+    
+    return render_template('resend_verification.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Handles user login. Supports GET for displaying form and POST for submission."""
+    # Clear any existing flash messages on GET request
+    if request.method == 'GET':
+        session.pop('_flashes', None)
+        
     if request.method == 'POST':
         login_id = request.form['login_id'].strip()
         password = request.form['password']
@@ -184,6 +475,11 @@ def login():
                 user = cursor.fetchone()
                 
                 if user and bcrypt.check_password_hash(user['password'], password):
+                    # Check if user is verified
+                    if not user['is_verified']:
+                        flash("Please verify your email address before logging in. Check your inbox for the verification link.", "warning")
+                        return render_template('login.html')
+                    
                     session['user_id'] = user['id']
                     session['login_id'] = user['login_id']
                     session['role'] = user['role']
@@ -212,6 +508,175 @@ def logout():
     session.clear()
     flash("You have been logged out.", "info")
     return redirect(url_for('login'))
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    """Handles password reset requests."""
+    # Clear any existing flash messages on GET request
+    if request.method == 'GET':
+        session.pop('_flashes', None)
+        
+    if request.method == 'POST':
+        email = request.form['email'].strip()
+        
+        if not email:
+            flash("Please enter your email address.", "warning")
+            return render_template('forgot_password.html')
+        
+        conn = None
+        cursor = None
+        try:
+            conn = get_connection()
+            if conn:
+                cursor = conn.cursor(dictionary=True)
+                cursor.execute("SELECT id, full_name FROM users WHERE email=%s", (email,))
+                user = cursor.fetchone()
+                
+                if user:
+                    # Generate reset token
+                    token = s.dumps(email, salt='password-reset-salt')
+                    reset_url = url_for('reset_password', token=token, _external=True)
+                    
+                    # Send email with Resend
+                    try:
+                        params = {
+                            "from": app.config['RESEND_FROM_EMAIL'],
+                            "to": [email],
+                            "subject": "Password Reset Request",
+                            "html": f'''<p>Hello {user['full_name']},</p>
+<p>You requested a password reset. Click the link below to reset your password:</p>
+<p><a href="{reset_url}">Reset Password</a></p>
+<p>This link will expire in 1 hour.</p>
+<p>If you didn't request this, please ignore this email.</p>
+<p>Thanks,<br>Course Management System</p>'''
+                        }
+                        resend.Emails.send(params)
+                        flash("Password reset link sent to your email. Please check your inbox.", "success")
+                    except Exception as e:
+                        print(f"[Email Error] {e}")
+                        # For development, show the reset link
+                        flash(f"Email service unavailable. Reset link: {reset_url}", "info")
+                else:
+                    # Don't reveal if email exists or not
+                    flash("If an account with that email exists, a password reset link has been sent.", "info")
+                    
+        except Exception as e:
+            print(f"[DB Error] {e}")
+            flash("An error occurred. Please try again.", "danger")
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+    
+    return render_template('forgot_password.html')
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    """Handles password reset with token validation."""
+    try:
+        # Verify token and get email (expires in 1 hour)
+        email = s.loads(token, salt='password-reset-salt', max_age=3600)
+    except:
+        flash("Invalid or expired reset link. Please request a new one.", "danger")
+        return redirect(url_for('forgot_password'))
+    
+    if request.method == 'POST':
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        
+        if not password or not confirm_password:
+            flash("Please fill out all fields.", "warning")
+            return render_template('reset_password.html', token=token)
+        
+        if password != confirm_password:
+            flash("Passwords do not match.", "danger")
+            return render_template('reset_password.html', token=token)
+        
+        if len(password) < 6:
+            flash("Password must be at least 6 characters long.", "danger")
+            return render_template('reset_password.html', token=token)
+        
+        conn = None
+        cursor = None
+        try:
+            conn = get_connection()
+            if conn:
+                cursor = conn.cursor()
+                hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+                cursor.execute("UPDATE users SET password=%s WHERE email=%s", (hashed_password, email))
+                conn.commit()
+                flash("Password reset successfully! Please log in with your new password.", "success")
+                return redirect(url_for('login'))
+            else:
+                flash("Database connection failed.", "danger")
+        except Exception as e:
+            print(f"[DB Error] {e}")
+            flash("An error occurred. Please try again.", "danger")
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+    
+    return render_template('reset_password.html', token=token)
+
+@app.route('/forgot_id', methods=['GET', 'POST'])
+def forgot_id():
+    """Help users recover their login ID using their email."""
+    # Clear any existing flash messages on GET request
+    if request.method == 'GET':
+        session.pop('_flashes', None)
+        
+    if request.method == 'POST':
+        email = request.form['email'].strip()
+        
+        if not email:
+            flash("Please enter your email address.", "warning")
+            return render_template('forgot_id.html')
+        
+        conn = None
+        cursor = None
+        try:
+            conn = get_connection()
+            if conn:
+                cursor = conn.cursor(dictionary=True)
+                cursor.execute("SELECT login_id, full_name FROM users WHERE email=%s", (email,))
+                user = cursor.fetchone()
+                
+                if user:
+                    # Send email with login ID using Resend
+                    try:
+                        params = {
+                            "from": app.config['RESEND_FROM_EMAIL'],
+                            "to": [email],
+                            "subject": "Your Login ID Information",
+                            "html": f'''<p>Hello {user['full_name']},</p>
+<p>Your login ID for Course Management System is: <strong>{user['login_id']}</strong></p>
+<p>You can use this ID to log in to your account.</p>
+<p>If you need to reset your password, visit: <a href="{url_for('forgot_password', _external=True)}">Forgot Password</a></p>
+<p>Thanks,<br>Course Management System</p>'''
+                        }
+                        resend.Emails.send(params)
+                        flash("Your login ID has been sent to your email. Please check your inbox.", "success")
+                    except Exception as e:
+                        print(f"[Email Error] {e}")
+                        # For development, show login ID
+                        flash(f"Email service unavailable. Your login ID is: {user['login_id']}", "info")
+                else:
+                    # Don't reveal if email exists or not
+                    flash("If an account with that email exists, your login ID information has been sent.", "info")
+                    
+        except Exception as e:
+            print(f"[DB Error] {e}")
+            flash("An error occurred. Please try again.", "danger")
+        finally:
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+    
+    return render_template('forgot_id.html')
 
 @app.route('/add_course', methods=['GET', 'POST'])
 @login_required

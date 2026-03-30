@@ -1,0 +1,4 @@
+# Environment variables file
+.env
+
+# Add this file to .gitignore to keep credentials secure
