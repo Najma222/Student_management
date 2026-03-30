@@ -1,4 +1,15 @@
-# Environment variables file
-.env
 
-# Add this file to .gitignore to keep credentials secure
+# Environments
+.env
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Database
+*.sqlite3
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
